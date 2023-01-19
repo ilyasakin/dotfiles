@@ -37,5 +37,6 @@ else
   installHomebrew
 fi
 
+ln -sf ~/dotfiles/.ideavimrc ~/.ideavimrc
 
 echo "Finished kickstarting"
