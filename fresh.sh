@@ -23,6 +23,14 @@ isCommandExists() {
   command -v "$1" &> /dev/null
 }
 
+checkIfFileExists() {
+    [ -f "$1" ]
+}
+
+installAntigen() {
+    curl -L git.io/antigen > antigen.zsh
+}
+
 # Setup
 
 if isOhMyZshExists; then
@@ -35,6 +43,12 @@ if isCommandExists brew; then
   echo "homebrew is installed"
 else
   installHomebrew
+fi
+
+if checkIfFileExists "./antigen.zsh"; then
+    echo "antigen is installed"
+else
+    installAntigen
 fi
 
 ln -sf ~/dotfiles/.ideavimrc ~/.ideavimrc
