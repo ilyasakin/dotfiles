@@ -6,3 +6,8 @@ vnoremap d "_d
 nnoremap <leader>d ""d
 nnoremap <leader>D ""D
 vnoremap <leader>d ""d
+
+set which-key
+
+" disable the timeout option
+set notimeout
