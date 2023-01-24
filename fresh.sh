@@ -52,5 +52,6 @@ else
 fi
 
 ln -sf ~/dotfiles/.ideavimrc ~/.ideavimrc
+ln -sf ~/dotfiles/nvim ~/.config/nvim
 
 echo "Finished kickstarting"
