@@ -54,4 +54,14 @@ fi
 ln -sf ~/dotfiles/.ideavimrc ~/.ideavimrc
 ln -sf ~/dotfiles/nvim ~/.config/nvim
 
+# Kitty
+rm -rf ~/.config/kitty
+mkdir ~/.config/kitty
+ln -sf ~/dotfiles/kitty.conf ~/.config/kitty/kitty.conf
+
+
+
+
+
+
 echo "Finished kickstarting"
