@@ -7,6 +7,7 @@ local M = {
     local diagnostics = null_ls.builtins.diagnostics
     local code_actions = null_ls.builtins.code_actions
     local completion = null_ls.builtins.completion
+    local lsp_utils = require("lspconfig.util")
 
     return {
       debug = false,
@@ -21,7 +22,12 @@ local M = {
         diagnostics.fish,
         diagnostics.trail_space,
         diagnostics.editorconfig_checker,
-        diagnostics.eslint,
+        diagnostics.eslint_d.with({
+          command = "eslint_d",
+          cwd = function(params)
+            return lsp_utils.root_pattern(".git")(params.bufname)
+          end,
+        }),
         code_actions.gitsigns,
       },
     }
