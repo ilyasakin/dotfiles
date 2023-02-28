@@ -9,7 +9,7 @@ local M = {
     local completion = null_ls.builtins.completion
 
     return {
-      debug = true,
+      debug = false,
       sources = {
         formatting.shfmt,
         formatting.stylua,
@@ -20,14 +20,9 @@ local M = {
         formatting.fish_indent,
         diagnostics.fish,
         diagnostics.trail_space,
-        diagnostics.cspell.with({
-          diagnostics_postprocess = function(diagnostic)
-            diagnostic.severity = vim.diagnostic.severity["WARN"]
-          end,
-        }),
         diagnostics.editorconfig_checker,
+        diagnostics.eslint,
         code_actions.gitsigns,
-        code_actions.cspell,
       },
     }
   end,
