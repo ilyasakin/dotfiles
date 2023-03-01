@@ -13,10 +13,13 @@ local M = {
           visible = true,
           hide_dotfiles = false,
           hide_gitignored = false,
-          hide_hidden = false,
+          hide_hidden = true,
           bind_to_cwd = false,
-          follow_current_file = true,
+          never_show = {
+            ".DS_Store",
+          },
         },
+        follow_current_file = true,
       },
       window = {
         mappings = {
