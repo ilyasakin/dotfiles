@@ -16,11 +16,6 @@ local M = {
         formatting.stylua,
         formatting.prettier,
         formatting.clang_format,
-        formatting.taplo,
-        formatting.black,
-        formatting.fish_indent,
-        diagnostics.fish,
-        diagnostics.trail_space,
         diagnostics.editorconfig_checker,
         diagnostics.eslint_d.with({
           command = "eslint_d",
