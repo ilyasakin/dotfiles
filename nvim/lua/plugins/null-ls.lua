@@ -14,7 +14,7 @@ local M = {
       sources = {
         formatting.shfmt,
         formatting.stylua,
-        formatting.prettier,
+        formatting.prettierd,
         formatting.clang_format,
         diagnostics.editorconfig_checker,
         diagnostics.eslint_d.with({
