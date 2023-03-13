@@ -61,6 +61,7 @@ else
 fi
 
 ln -sf ~/dotfiles/.ideavimrc ~/.ideavimrc
+ln -sf ~/dotfiles/.tmux.conf ~/.tmux.conf
 ln -sf ~/dotfiles/nvim ~/.config/nvim
 
 # Kitty
