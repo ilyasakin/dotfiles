@@ -15,8 +15,6 @@ local M = {
         formatting.shfmt,
         formatting.stylua,
         formatting.prettierd,
-        formatting.clang_format,
-        diagnostics.editorconfig_checker,
         diagnostics.eslint_d.with({
           command = "eslint_d",
           cwd = function(params)
