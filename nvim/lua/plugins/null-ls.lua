@@ -14,13 +14,13 @@ local M = {
       sources = {
         formatting.shfmt,
         formatting.stylua,
-        formatting.prettierd,
+        -- formatting.prettierd,
         -- diagnostics.eslint_d.with({
         --   command = "eslint_d",
-        --  cwd = function(params)
+        --   cwd = function(params)
         --     return lsp_utils.root_pattern(".git")(params.bufname)
-        --    end,
-        --   }),
+        --   end,
+        -- }),
         code_actions.gitsigns,
       },
     }
