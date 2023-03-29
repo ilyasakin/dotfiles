@@ -15,12 +15,12 @@ local M = {
         formatting.shfmt,
         formatting.stylua,
         -- formatting.prettierd,
-        -- diagnostics.eslint_d.with({
-        --   command = "eslint_d",
-        --   cwd = function(params)
-        --     return lsp_utils.root_pattern(".git")(params.bufname)
-        --   end,
-        -- }),
+        diagnostics.eslint_d.with({
+          command = "eslint_d",
+          cwd = function(params)
+            return lsp_utils.root_pattern(".git")(params.bufname)
+          end,
+        }),
         code_actions.gitsigns,
       },
     }
