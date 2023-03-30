@@ -14,7 +14,7 @@ local M = {
       sources = {
         formatting.shfmt,
         formatting.stylua,
-        -- formatting.prettierd,
+        formatting.prettierd,
         diagnostics.eslint_d.with({
           command = "eslint_d",
           cwd = function(params)
