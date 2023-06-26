@@ -51,15 +51,6 @@ local M = {
           cwd = function(params)
             return lsp_utils.root_pattern(".git")(params.bufname)
           end,
-          config = {
-            root_dir = function()
-              if not eslint_config_exists() then
-                return nil
-              end
-
-              return vim.fn.getcwd()
-            end,
-          },
         })
       )
     end
