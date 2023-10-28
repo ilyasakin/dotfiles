@@ -65,6 +65,7 @@ ln -sf ~/dotfiles/.tmux.conf ~/.tmux.conf
 ln -sf ~/dotfiles/yabai ~/.config/yabai
 ln -sf ~/dotfiles/skhd ~/.config/skhd
 ln -sf ~/dotfiles/tmux ~/.config/tmux
+ln -sf ~/dotfiles/alacritty ~/.config/alacritty
 
 # Kitty
 rm -rf ~/.config/kitty
