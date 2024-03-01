@@ -16,7 +16,3 @@ style = "Italic"
 [font.normal]
 family = "FiraCode Nerd Font Mono"
 style = "Regular"
-
-[env]
-TERM = "alacritty"
-
