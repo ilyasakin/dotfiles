@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+LANGUAGES="nodejs javascript tmux typescript zsh lua rust bash css html csharp" 
+selected=`echo "$LANGUAGES" | tr ' ' '\n' | fzf`
+
+if [[ -z $selected ]]; then
+    exit 0
+fi
+
+echo "You selected: $selected"
+
+read -p "ENTER QUERY: " query
+
+query=`echo $query | tr ' ' '+'`
+query=`echo $selected/$query`
+
+# echo $query
+
+cht.sh $query | less
