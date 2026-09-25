@@ -109,6 +109,46 @@ if due_weekly chrome-mcp; then
   fi
 fi
 
+# Claude Code plugin cache: every plugin update leaves the old version behind.
+# Keep the installed version and any version a running session still uses.
+if due_weekly claude-plugins; then
+  stale=(${(f)"$(python3 - <<'EOF'
+import json, os, re, subprocess
+home = os.path.expanduser('~')
+cache = f'{home}/.claude/plugins/cache'
+try:
+    inst = json.load(open(f'{home}/.claude/plugins/installed_plugins.json'))
+except OSError:
+    raise SystemExit
+keep = set()
+untouchable = set()  # plugin dirs whose recorded install path is missing: can't tell which version is live
+for entries in inst.get('plugins', {}).values():
+    for e in (entries if isinstance(entries, list) else [entries]):
+        p = e.get('installPath')
+        if not p:
+            continue
+        keep.add(os.path.realpath(p))
+        if not os.path.isdir(p):
+            untouchable.add(os.path.realpath(os.path.dirname(p)))
+ps = subprocess.run(['ps', 'eww', '-axo', 'command'], capture_output=True, text=True).stdout
+keep |= {os.path.realpath(m) for m in re.findall(r'(/[^\s:"]+/\.claude/plugins/cache/[^/\s:"]+/[^/\s:"]+/[^/\s:"]+)', ps)}
+for market in os.listdir(cache):
+    for plugin in os.listdir(f'{cache}/{market}'):
+        pdir = f'{cache}/{market}/{plugin}'
+        if not os.path.isdir(pdir) or os.path.realpath(pdir) in untouchable:
+            continue
+        for ver in os.listdir(pdir):
+            v = os.path.realpath(f'{pdir}/{ver}')
+            if os.path.isdir(v) and v not in keep:
+                print(v)
+    if market.startswith('temp_git_'):  # leftovers from interrupted plugin downloads
+        print(os.path.realpath(f'{cache}/{market}'))
+EOF
+)"})
+  remove "old Claude Code plugin versions" $stale
+  mark_done claude-plugins
+fi
+
 # --- report -----------------------------------------------------------------
 log "=== done: $( (( DRY )) && print 'would free' || print 'freed') $(mb $total_kb), $(df -h / | awk 'NR==2{print $4}') free"
 
