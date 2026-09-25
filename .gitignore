@@ -2,3 +2,7 @@ antigen.zsh
 .DS_Store
 */**/.DS_Store
 tmux/plugins
+# build output
+aerospace/center_float
+# editor/tool backups
+*.bak

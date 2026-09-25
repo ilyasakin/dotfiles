@@ -11,16 +11,17 @@
 # You can use it to add commands that run after AeroSpace startup.
 # 'after-startup-command' is run after 'after-login-command'
 # Available commands : https://nikitabobko.github.io/AeroSpace/commands
-after-startup-command = [
-  'exec-and-forget borders active_color=0xffe1e3e4 inactive_color=0xff494d64 width=5.0',
-  'exec-and-forget sketchybar'
-]
+# Experimental: answer window frame reads from WindowServer (~30x faster than AX)
+skylight-reads = true
 
-exec-on-workspace-change = [
-  '/bin/bash', 
-  '-c',
-  'sketchybar --trigger aerospace_workspace_change FOCUSED_WORKSPACE=$AEROSPACE_FOCUSED_WORKSPACE'
-]
+# Native window borders (replaces the external `borders` tool)
+window-borders.enabled = true
+window-borders.active-color = '0xffe1e3e4'
+window-borders.inactive-color = '0xff494d64'
+window-borders.width = 5
+window-borders.corner-radius = 10
+# Match system radii via NSThemeFrame probes (plain vs toolbar); no Screen Recording.
+window-borders.detect-corner-radius = true
 
 # Start AeroSpace at login
 start-at-login = true
@@ -257,3 +258,35 @@ run = 'move-node-to-workspace O'
 if.app-id = 'com.apple.iCal'
 check-further-callbacks = false
 run = 'move-node-to-workspace T'
+
+[bar]
+enabled = true
+height = 28
+font-size = 14
+modules-left = ['workspaces', 'mode', 'focused']
+modules-right = ['cpu', 'gpu', 'network', 'memory', 'battery', 'volume', 'clock']
+hide-empty-workspaces = true
+focused-show-icon = true
+
+# Digit workspaces → kanji labels
+[bar.workspace-symbols]
+0 = '〇'
+1 = '一'
+2 = '二'
+3 = '三'
+4 = '四'
+5 = '五'
+6 = '六'
+7 = '七'
+8 = '八'
+9 = '九'
+
+[focus-follows-mouse]
+enabled = false
+
+# Raycast's launcher is an overlay, not a window to manage. 'ignore' classifies it as a popup, so
+# it is never placed in the tree — which also means no border, since borders are drawn per managed
+# window. App-specific knowledge lives here in config, never as a branch in the classifier.
+[[window-detection-rules]]
+if.app-id = 'com.raycast.macos'
+treat-as = 'ignore'
