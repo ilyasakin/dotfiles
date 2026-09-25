@@ -120,8 +120,6 @@ brew "mingw-w64"
 brew "mono-libgdiplus"
 # Remote terminal application
 brew "mosh"
-# HTTP(S) server and reverse proxy, and IMAP/POP3 proxy server
-brew "nginx"
 # Small build system for use with gyp or CMake
 brew "ninja"
 # Smart, Fast and Extensible Build System
