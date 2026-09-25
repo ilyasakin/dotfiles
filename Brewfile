@@ -1,6 +1,4 @@
 tap "aprilnea/tap"
-tap "asmvik/formulae", "https://github.com/asmvik/homebrew-formulae.git"
-tap "felixkratz/formulae", "https://github.com/FelixKratz/homebrew-formulae"
 tap "homebrew/services"
 tap "isen-ng/dotnet-sdk-versions"
 tap "microsoft/mssql-release"

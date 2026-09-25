@@ -37,8 +37,6 @@ link .ideavimrc   "$HOME/.ideavimrc"
 
 # window management
 link aerospace    "$HOME/.config/aerospace"
-link yabai        "$HOME/.config/yabai"
-link skhd         "$HOME/.config/skhd"
 
 # git: shared settings are included from ~/.gitconfig, which stays machine-local
 # (identity, and whatever `git config --global` writes)
