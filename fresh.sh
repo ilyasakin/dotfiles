@@ -15,13 +15,12 @@ installOhMyZsh() {
 installHomebrew() {
 	/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-	echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >>$HOME/.zprofile
+	# zsh/zprofile (linked below) already sets up Homebrew's environment
 	eval "$(/opt/homebrew/bin/brew shellenv)"
 }
 
 isCommandExists() {
-	command -v "$1" &
-	>/dev/null
+	command -v "$1" >/dev/null 2>&1
 }
 
 checkIfFileExists() {
@@ -60,24 +59,20 @@ else
 	installAntigen
 fi
 
-unlink ~/.ideavimrc
-ln -sf ~/dotfiles/.ideavimrc ~/.ideavimrc
-unlink ~/.tmux.conf
-ln -sf ~/dotfiles/.tmux.conf ~/.tmux.conf
-unlink ~/.config/yabai
-ln -sf ~/dotfiles/yabai ~/.config/yabai
-unlink ~/.config/skhd
-ln -sf ~/dotfiles/skhd ~/.config/skhd
-unlink ~/.config/tmux
-ln -sf ~/dotfiles/tmux ~/.config/tmux
-unlink ~/.config/alacritty
-ln -sf ~/dotfiles/alacritty ~/.config/alacritty
+# Symlink configs, scripts and git settings (safe to re-run)
+sh ./link.sh
 
-# Kitty
-unlink ~/.config/kitty
-rm -rf ~/.config/kitty
-mkdir ~/.config/kitty
-ln -sf ~/dotfiles/kitty.conf ~/.config/kitty/kitty.conf
+# Everything installed with Homebrew (regenerate with: brew bundle dump --force --file=Brewfile)
+brew bundle --file=./Brewfile
+
+# AeroSpace float-centering helper is compiled, not committed
+if [ ! -x ./aerospace/center_float ] && isCommandExists swiftc; then
+	swiftc -O ./aerospace/center_float.swift -o ./aerospace/center_float
+fi
+
+# Daily cache cleanup (launchd won't follow a symlinked plist, so copy it)
+cp ./launchd/com.ilyasakin.daily-cleanup.plist ~/Library/LaunchAgents/
+launchctl bootstrap "gui/$(id -u)" ~/Library/LaunchAgents/com.ilyasakin.daily-cleanup.plist 2>/dev/null || true
 
 if isCommandExists timer; then
 	echo "timer is installed"
