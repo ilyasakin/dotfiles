@@ -1,0 +1,75 @@
+# ~/.zshrc — interactive-shell config. PATH is set in ~/.zprofile.
+
+typeset -U path fpath
+
+# --- oh-my-zsh ---------------------------------------------------------------
+export ZSH="$HOME/.oh-my-zsh"
+ZSH_THEME="robbyrussell"
+ZSH_DISABLE_COMPFIX=true   # skip compaudit's permission scan on every start
+plugins=(git zsh-autosuggestions zsh-syntax-highlighting)
+
+# Extra completion dirs must be on fpath before oh-my-zsh runs compinit.
+fpath=(~/.grok/completions/zsh $fpath)
+
+source $ZSH/oh-my-zsh.sh
+
+# --- environment -------------------------------------------------------------
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+
+if [[ -n $SSH_CONNECTION ]]; then
+  export EDITOR='vim'
+else
+  export EDITOR='nvim'
+fi
+
+export KUIKA_TERMINAL="alacritty"
+
+# --- history (on top of oh-my-zsh's share_history/extended_history) ----------
+HISTSIZE=50000
+SAVEHIST=50000                 # was 10000 on disk vs 50000 in memory
+HISTORY_IGNORE='(exit|clear|ls|pwd)'
+setopt hist_ignore_all_dups    # a repeated command replaces its older copy
+setopt hist_save_no_dups
+setopt hist_find_no_dups       # Ctrl-R / up-arrow never show the same command twice
+setopt hist_reduce_blanks
+setopt hist_fcntl_lock         # safer, faster locking with many terminals open
+
+# --- tools -------------------------------------------------------------------
+[[ -s ~/.bun/_bun ]] && source ~/.bun/_bun   # bun completions
+
+eval "$(fnm env --use-on-cd)"
+if [[ "$CLAUDECODE" != "1" ]]; then
+  eval "$(zoxide init --cmd cd zsh)"
+fi
+
+[[ "$TERM_PROGRAM" == "kiro" ]] && . "$(kiro --locate-shell-integration-path zsh)"
+
+# --- key bindings ------------------------------------------------------------
+bindkey -s '^s' 'c\n'
+
+# Pre-fill `git commit -m "<TICKET> ` using the ticket ID from the branch name
+git_commit_branch() {
+  local branch ticket cmd
+  branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+  if [[ -n $branch ]]; then
+    [[ $branch =~ '[A-Z]+-[0-9]+' ]] && ticket=$MATCH
+    cmd="git commit -m \"${ticket:-$branch} "
+    if [[ -n ${ZLE_STATE-} ]]; then
+      LBUFFER="$cmd"
+    else
+      print -zr -- "$cmd"
+    fi
+  else
+    echo "Not in a git repository"
+  fi
+}
+zle -N git_commit_branch
+
+# --- aliases -----------------------------------------------------------------
+alias kc='git_commit_branch'
+alias vlt="nvim ~/Library/Mobile\ Documents/iCloud~md~obsidian/Documents/Vault"
+alias gaak='git add --all -- ":!**/launchSettings*.json"'
+alias grsk='git restore -- . ":!**/launchSettings*.json"'
+alias codex="codex --dangerously-bypass-approvals-and-sandbox"
+alias claude='claude --enable-auto-mode'

@@ -1,0 +1,117 @@
+#!/bin/zsh
+# daily-cleanup — trims caches that tools regenerate on their own.
+# Never touches project files, node_modules, or anything currently in use.
+#
+#   daily-cleanup            run it
+#   daily-cleanup --dry-run  show what would be removed, remove nothing
+#
+# Scheduled by ~/Library/LaunchAgents/com.ilyasakin.daily-cleanup.plist
+# Log: ~/Library/Logs/daily-cleanup.log
+
+setopt null_glob pipe_fail
+export PATH="$HOME/.local/share/fnm/aliases/default/bin:/opt/homebrew/bin:/usr/local/bin:/usr/local/share/dotnet:$HOME/.bun/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+
+DRY=0; [[ ${1:-} == --dry-run ]] && DRY=1
+STATE=~/.local/state/daily-cleanup; mkdir -p $STATE
+NOTIFY_MIN_MB=1024
+total_kb=0
+
+log() { print -r -- "$(date '+%F %T') $*"; }
+size_kb() { du -skc "$@" 2>/dev/null | tail -1 | cut -f1; }
+mb() { printf '%d MB' $(( $1 / 1024 )); }
+
+# run a weekly task at most once every 7 days (stamp file per task)
+due_weekly() {
+  local stamp=$STATE/$1
+  [[ ! -f $stamp ]] || [[ -n $(find $stamp -mtime +6 2>/dev/null) ]]
+}
+mark_done() { (( DRY )) || touch $STATE/$1; }
+
+# delete paths, counting freed space; honours --dry-run
+remove() {
+  local label=$1; shift
+  (( $# )) || return 0
+  local kb=$(size_kb "$@")
+  (( kb == 0 )) && return 0
+  if (( DRY )); then log "would remove $label: $(mb $kb) ($# items)"
+  else rm -rf -- "$@" && log "removed $label: $(mb $kb) ($# items)"; fi
+  total_kb=$(( total_kb + kb ))
+}
+
+# free space before/after, measured by a command's own cleanup
+measured() {
+  local label=$1; shift
+  if (( DRY )); then log "would run $label"; return; fi
+  local before=$(df -k / | awk 'NR==2{print $4}')
+  "$@" >/dev/null 2>&1 || log "$label: exited with $?"
+  local after=$(df -k / | awk 'NR==2{print $4}')
+  local kb=$(( after - before )); (( kb < 0 )) && kb=0
+  total_kb=$(( total_kb + kb )); log "ran $label: ~$(mb $kb)"
+}
+
+log "=== start$( (( DRY )) && print ' (dry run)')"
+
+# --- daily ------------------------------------------------------------------
+
+# npx cache: entries unused for 14+ days, skipping any a running process uses
+inuse=(${(f)"$(ps -axo command | grep -oE '\.npm/_npx/[0-9a-f]+' | sort -u | sed 's#.*/##')"})
+stale=()
+for d in ~/.npm/_npx/*(/N); do
+  (( ${inuse[(Ie)${d:t}]} )) && continue
+  [[ -n $(find $d -maxdepth 0 -mtime +14) ]] && stale+=($d)
+done
+remove "npx cache (unused 14d+)" $stale
+
+# bun cache: package entries not refreshed for 30+ days
+remove "bun cache (30d+)" ${(f)"$(find ~/.bun/install/cache -mindepth 1 -maxdepth 1 -mtime +30 2>/dev/null)"}
+
+# Docker: build cache older than 7 days + dangling images (only if the daemon is already up)
+if command -v docker >/dev/null && timeout 5 docker info >/dev/null 2>&1; then
+  if (( DRY )); then
+    log "would trim docker build cache to 2 GB and prune (dangling); total reclaimable now: $(docker system df --format '{{.Type}} {{.Reclaimable}}' 2>/dev/null | tr '\n' ' ')"
+  else
+    # Docker's data lives in OrbStack's VM disk, which hands space back to macOS gradually,
+    # so log what Docker reports instead of measuring the host's free space
+    out=$(docker builder prune -f --max-used-space 2gb 2>&1 | tail -1)
+    log "docker build cache trimmed to newest 2 GB: reclaimed ${${out##*:}//[[:space:]]/}"
+    out=$(docker image prune -f 2>&1 | tail -1)
+    log "docker dangling images: reclaimed ${${out##*:}//[[:space:]]/}"
+  fi
+else
+  log "docker not running, skipped"
+fi
+
+# --- weekly -----------------------------------------------------------------
+
+if due_weekly homebrew; then
+  measured "brew cleanup" brew cleanup --prune=30
+  mark_done homebrew
+fi
+
+if due_weekly nuget; then
+  remove "NuGet HTTP cache" ~/.local/share/NuGet/http-cache
+  mark_done nuget
+fi
+
+if due_weekly pnpm; then
+  measured "pnpm store prune" pnpm store prune
+  mark_done pnpm
+fi
+
+# chrome-devtools-mcp browser cache (keeps cookies/logins); skipped while that Chrome runs
+if due_weekly chrome-mcp; then
+  P=~/.cache/chrome-devtools-mcp/chrome-profile/Default
+  if pgrep -f chrome-devtools-mcp/chrome-profile >/dev/null; then
+    log "chrome-devtools-mcp browser running, skipped"
+  else
+    remove "chrome-devtools-mcp browser cache" "$P/Cache" "$P/Code Cache"
+    mark_done chrome-mcp
+  fi
+fi
+
+# --- report -----------------------------------------------------------------
+log "=== done: $( (( DRY )) && print 'would free' || print 'freed') $(mb $total_kb), $(df -h / | awk 'NR==2{print $4}') free"
+
+if (( !DRY && total_kb >= NOTIFY_MIN_MB * 1024 )); then
+  osascript -e "display notification \"Freed $(mb $total_kb) of caches\" with title \"Daily cleanup\"" 2>/dev/null
+fi

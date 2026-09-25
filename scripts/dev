@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# Set the session name
+SESSION_NAME="dev"
+
+# Set the project directory. Use the first argument if provided, otherwise use the current directory.
+PROJECT_DIR="${1:-.}"
+
+# Check if the session already exists
+tmux has-session -t $SESSION_NAME 2>/dev/null
+
+# $? is 0 if the session exists
+if [ $? = 0 ]; then
+  # Attach to the existing session
+  tmux attach-session -t $SESSION_NAME
+else
+  # Create a new detached session in the project directory, running nvim in the first pane
+  tmux new-session -d -s $SESSION_NAME -c "$PROJECT_DIR" 'nvim'
+
+  # Split the window horizontally, running gemini in the new pane (10% of width)
+  tmux split-window -h -p 10 -c "$PROJECT_DIR" 'gemini'
+
+  # Select the nvim pane to make it active
+  tmux last-pane
+
+  # Attach to the new session
+  tmux attach-session -t $SESSION_NAME
+fi

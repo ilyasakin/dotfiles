@@ -1,0 +1,59 @@
+# Shared git settings. Personal identity lives in ~/.gitconfig, which includes this file.
+[core]
+	autocrlf = input
+	pager = delta
+	untrackedCache = true  # `git status` ~105 -> ~46 ms on a 17k-file repo
+[credential "https://github.com"]
+	helper =
+	helper = !/opt/homebrew/bin/gh auth git-credential
+[credential "https://gist.github.com"]
+	helper =
+	helper = !/opt/homebrew/bin/gh auth git-credential
+
+[init]
+	defaultBranch = main
+[help]
+	autocorrect = prompt    # "Did you mean …?" instead of just failing
+
+# --- branches & tags ---------------------------------------------------------
+[branch]
+	sort = -committerdate   # most recently touched branches first
+[tag]
+	sort = version:refname  # v1.10 after v1.9
+[column]
+	ui = auto
+
+# --- fetch / pull / push -----------------------------------------------------
+[fetch]
+	prune = true            # drop remote-tracking branches deleted on the remote
+	writeCommitGraph = true # faster log/graph/merge-base on big histories
+[pull]
+	rebase = true           # no merge commits from `git pull`
+[push]
+	autoSetupRemote = true  # first `git push` of a new branch sets its upstream
+[rebase]
+	autoStash = true        # stash/unstash a dirty tree around rebase (and pull)
+	autoSquash = true       # honour fixup!/squash! commits
+	updateRefs = true       # move stacked branches along with a rebase
+
+# --- diff / merge ------------------------------------------------------------
+[diff]
+	algorithm = histogram
+	colorMoved = default    # moved lines shown differently from added/removed
+	mnemonicPrefix = true   # i/ w/ c/ instead of a/ b/
+	renames = true
+[merge]
+	conflictStyle = zdiff3  # conflict markers include the common ancestor
+[rerere]
+	enabled = true          # remember conflict resolutions and replay them
+	autoupdate = true
+[commit]
+	verbose = true          # show the diff in the commit message editor
+
+# --- delta (pager) -----------------------------------------------------------
+[interactive]
+	diffFilter = delta --color-only
+[delta]
+	navigate = true         # n / N jump between files
+	line-numbers = true
+	syntax-theme = OneHalfDark

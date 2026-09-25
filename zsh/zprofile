@@ -1,0 +1,48 @@
+# ~/.zprofile — login-shell environment (runs once per login, before .zshrc).
+# PATH lives here rather than in .zshenv because macOS /etc/zprofile runs
+# path_helper, which would reorder anything set earlier.
+
+typeset -U path fpath   # keep PATH/FPATH free of duplicates
+
+# Homebrew — static equivalent of `eval "$(/opt/homebrew/bin/brew shellenv)"`
+export HOMEBREW_PREFIX=/opt/homebrew
+export HOMEBREW_CELLAR=/opt/homebrew/Cellar
+export HOMEBREW_REPOSITORY=/opt/homebrew
+export INFOPATH="/opt/homebrew/share/info:${INFOPATH:-}"
+fpath=(/opt/homebrew/share/zsh/site-functions $fpath)
+
+# Prepended, highest priority first. Missing dirs are skipped by (N-/).
+path=(
+  ~/.grok/bin
+  ~/.local/bin                        # Antigravity CLI, zerobrew, personal scripts
+  ~/.antigravity/antigravity/bin
+  ~/go/bin
+  /opt/homebrew/opt/ruby/bin
+  ~/.codeium/windsurf/bin
+  /opt/homebrew/opt/llvm/bin
+  /opt/homebrew/opt/bison/bin
+  ~/.bun/bin
+  /opt/homebrew/bin
+  /opt/homebrew/sbin
+  $path
+)
+
+# Appended, lowest priority.
+path+=(
+  ~/.cargo/bin
+  ~/"Library/Application Support/JetBrains/Toolbox/scripts"
+  ~/.dotnet/tools
+  ~/.lmstudio/bin
+  # Pi coding agent is installed under fnm's default Node; keep it reachable
+  # without letting this Node shadow the version fnm picks per project.
+  ~/.local/share/fnm/node-versions/v24.15.0/installation/bin
+)
+path=(${^path}(N-/))   # drop entries that don't exist
+export PATH
+
+export BUN_INSTALL="$HOME/.bun"
+export SHELL_SESSIONS_DISABLE=1
+
+# Added by OrbStack: command-line tools and integration
+# This won't be added again if you remove it.
+source ~/.orbstack/shell/init.zsh 2>/dev/null || :

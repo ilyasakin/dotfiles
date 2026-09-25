@@ -1,0 +1,12 @@
+# zerobrew
+export ZEROBREW_DIR=/Users/ilyasakin/.zerobrew
+export ZEROBREW_BIN=/Users/ilyasakin/.local/bin
+_zb_path_append() {
+    local argpath="$1"
+    case ":${PATH}:" in
+        *:"$argpath":*) ;;
+        *) export PATH="$argpath:$PATH" ;;
+    esac;
+}
+_zb_path_append /opt/zerobrew/prefix/bin
+. "$HOME/.cargo/env"
