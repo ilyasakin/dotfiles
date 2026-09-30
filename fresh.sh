@@ -12,6 +12,16 @@ installOhMyZsh() {
 	/bin/sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/HEAD/tools/install.sh)"
 }
 
+installZshPlugin() {
+	plugin_dir="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/$1"
+	if [ -d "$plugin_dir" ]; then
+		echo "$1 is installed"
+	else
+		mkdir -p "$(dirname "$plugin_dir")" &&
+			git clone "https://github.com/zsh-users/$1.git" "$plugin_dir"
+	fi
+}
+
 installHomebrew() {
 	/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
@@ -46,6 +56,10 @@ if isOhMyZshExists; then
 else
 	installOhMyZsh
 fi
+
+# Third-party plugins enabled in zsh/zshrc aren't bundled with Oh My Zsh.
+installZshPlugin zsh-autosuggestions || exit 1
+installZshPlugin zsh-syntax-highlighting || exit 1
 
 if isCommandExists brew; then
 	echo "homebrew is installed"
